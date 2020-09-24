@@ -68,9 +68,14 @@ export class ModelProvider extends Component<ModelProviderType> {
 
     public updateData(cqPath?: string) {
         const path = cqPath || this.props.cqPath;
-        ModelManager.getData({path, forceReload: this.props.cqForceReload}).then((data: Model) => {
-            this.setState(Utils.modelToProps(data));
-        });
+        if (path) {
+            ModelManager.getData({ path, forceReload: this.props.cqForceReload}).then((data: Model) => {
+              const props = data && (Object.keys(data).length > 0) && Utils.modelToProps(data);
+              if (props && (!props.cqPath || props.cqPath === path)) {
+                  this.setState(props);
+              }
+          });
+        }
     }
 
     private getCQPath() {
@@ -96,7 +101,7 @@ export class ModelProvider extends Component<ModelProviderType> {
     public componentDidMount() {
         const cqPath = this.getCQPath();
         if (this.props.injectPropsOnInit) {
-          this.updateData(cqPath);
+            this.updateData(cqPath);
         }
         ModelManager.addListener(cqPath, this.updateData);
     }
